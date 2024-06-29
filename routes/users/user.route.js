@@ -11,7 +11,7 @@ userRouter.post("/signup", async (req, res) => {
     //if exist user already
     const existingUser = await UserModel.findOne({ uIdByFirebase });
     if (existingUser) {
-    const updatedExistUser =await UserModel.updateOne({ uIdByFirebase }, {existingUser.name:name, photoURL });
+   const existUpdatedDetails =   await UserModel.updateOne({ uIdByFirebase }, { name, photoURL });
       const token = jwt.sign(
         { userId: existingUser._id, name: existingUser.name },
         process.env.JWT_SECRET,
@@ -21,7 +21,7 @@ userRouter.post("/signup", async (req, res) => {
       );
       return res
         .status(httpStatus.OK)
-        .json({ updatedExistUser, token, message: "you are already registered" });
+        .json({ existUpdatedDetails, token, message: "you are already registered" });
     }
     // create new user
     const user = new UserModel(req.body);
