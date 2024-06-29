@@ -5,11 +5,12 @@ const { httpStatus } = require("../../config/lib/statusCode");
 const { LikeModel } = require("../../models/postLike.model");
 const postRouter = express.Router();
 
+// create a post
 postRouter.post("/create", auth, async (req, res) => {
   try {
     const newPost = new PostModel({
       ...req.body,
-      createdBy: req.body.displayName,
+      createdBy: req.body.name,
     });
     await newPost.save();
     res.status(httpStatus.CREATED).json({ newPost });
@@ -18,8 +19,8 @@ postRouter.post("/create", auth, async (req, res) => {
   }
 });
 // Add a route to fetch all posts
-postRouter.get("/posts", auth, async (req, res) => {
-  const { userId } = req.body; // Ensure userId is obtained from query parameters
+postRouter.get("/", auth, async (req, res) => {
+  const { userId } = req.body;
 
   try {
     const posts = await PostModel.aggregate([
@@ -44,13 +45,14 @@ postRouter.get("/posts", auth, async (req, res) => {
       },
       {
         $project: {
-          title: 1,
           content: 1,
-          category: 1,
+          tag: 1,
           createdAt: 1,
           likes: 1,
-          "user.displayName": 1,
+          "user.name": 1,
           "user.photoURL": 1,
+          blogHeader: 1,
+          view: 1,
         },
       },
     ]);
