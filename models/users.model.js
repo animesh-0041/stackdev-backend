@@ -14,7 +14,7 @@ const userSchema = mongoose.Schema(
       type: String,
       default: null,
     },
-    uIdByFirebase:{
+    uIdByFirebase: {
       type: String,
       required: true,
       default: null,
@@ -24,7 +24,7 @@ const userSchema = mongoose.Schema(
       default: null,
     },
     lastActive: {
-      type: String,
+      type: Date,
       default: new Date(),
     },
     isBloked: {
@@ -38,6 +38,7 @@ const userSchema = mongoose.Schema(
     registerOption: {
       type: String,
       required: true,
+      enum: ["Google", "Github", "EmailAndPassword"],
     },
   },
   {

@@ -10,7 +10,7 @@ const auth = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log(decoded);
     req.body.userId = decoded.userId;
-    req.body.displayName = decoded.displayName;
+    req.body.name = decoded.name;
     next();
   } catch (error) {
     return res.status(httpStatus.UNAUTHORIZED).send({ msg: "session expired" });
