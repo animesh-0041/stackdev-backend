@@ -4,24 +4,29 @@ const jwt = require("jsonwebtoken");
 const { UserModel } = require("../../models/users.model");
 const { httpStatus } = require("../../config/lib/statusCode");
 
-//registetion
+//-------Register User-----------------
 userRouter.post("/signup", async (req, res) => {
-  const { uIdByFirebase } = req.body;
-  console.log(uIdByFirebase);
+  const { uIdByFirebase, name, photoURL } = req.body;
   try {
+    //if exist user already
     const existingUser = await UserModel.findOne({ uIdByFirebase });
     if (existingUser) {
+      await UserModel.findByIdAndUpdate(
+        { uIdByFirebase },
+        { name, photoURL }
+      );
       const token = jwt.sign(
         { userId: existingUser._id, displayName: existingUser.displayName },
         process.env.JWT_SECRET,
         {
-          expiresIn: "5h",
+          expiresIn: "24h",
         }
       );
       return res
         .status(httpStatus.CREATED)
         .json({ existingUser, token, message: "you are already registered" });
     }
+    // create new user
     const user = new UserModel(req.body);
     await user.save();
     const token = jwt.sign(
@@ -36,5 +41,8 @@ userRouter.post("/signup", async (req, res) => {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }
 });
+
+// -------Login User-----------------
+// (will be taken care in future)
 
 module.exports = { userRouter };

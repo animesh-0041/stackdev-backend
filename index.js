@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.get("/", (req, res) => {
-  res.send("OK");
+  res.send("Api is working good to go 😍");
 });
 app.get("/test", auth, (req, res) => {
   res.send("test");

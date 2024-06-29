@@ -4,6 +4,7 @@ const { auth } = require("../../middlewares/auth.middlewares");
 const { LikeModel } = require("../../models/postLike.model");
 const { UserModel } = require("../../models/users.model");
 const { httpStatus } = require("../../config/lib/statusCode");
+const { lastActiveUpdation } = require("../../helpers/lastActiveUpdation");
 //like and unlike post
 likeRouter.post("/like", auth, async (req, res) => {
   const { postId, userId } = req.body;
@@ -21,12 +22,9 @@ likeRouter.post("/like", auth, async (req, res) => {
       userId: userId,
     });
     await like.save();
+     // Update the lastActive field in the UserModel
+    await lastActiveUpdation(userId);
     res.status(httpStatus.CREATED).json({ message: "Post liked" });
-    // Update the lastActive field in the UserModel
-    await UserModel.findByIdAndUpdate(
-      { _id: userId },
-      { lastActive: new Date() }
-    );
   } catch (error) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }

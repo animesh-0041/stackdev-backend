@@ -1,10 +1,7 @@
 const mongoose = require("mongoose");
 
 const postSchema = mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
+
   content: {
     type: String,
     required: true,
@@ -33,3 +30,26 @@ const postSchema = mongoose.Schema({
 
 const PostModel = mongoose.model("Post", postSchema);
 module.exports = { PostModel };
+
+
+/*
+
+
+{
+  _id: '',
+  date: '',
+  view: '',
+  content: [],
+  tags: [],
+  profile: {
+    title: '',
+    desc: '',
+    postImage: '',
+  },
+  userData: {
+    _id: '',
+    name: '',
+    Userprofile: '',
+  },
+}
+*/
