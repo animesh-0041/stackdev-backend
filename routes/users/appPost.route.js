@@ -19,7 +19,7 @@ postRouter.post("/create", auth, async (req, res) => {
   }
 });
 // Add a route to fetch all posts
-postRouter.get("/", auth, async (req, res) => {
+postRouter.get("/",  async (req, res) => {
   const { userId } = req.body;
 
   try {
