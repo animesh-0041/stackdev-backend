@@ -26,6 +26,10 @@ const postSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    url: {
+      type: String,
+      default: null,
+    },
     blogHeader: {
       type: {},
       required: true,
