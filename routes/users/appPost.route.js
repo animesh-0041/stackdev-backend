@@ -72,4 +72,23 @@ postRouter.get("/",  async (req, res) => {
   }
 });
 
+
+//Individual post
+postRouter.get("/:postId", async (req, res) => {
+  const { postId } = req.params;
+  try {
+    const post = await PostModel.findById(postId);
+    if (!post) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "Post not found" });
+    }
+    res.status(httpStatus.OK).json({ post });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch post" });
+  }
+});
+
 module.exports = { postRouter };
