@@ -19,13 +19,13 @@ postRouter.post("/create", auth, async (req, res) => {
   }
 });
 // Add a route to fetch all posts
-postRouter.get("/",  async (req, res) => {
+postRouter.get("/", async (req, res) => {
   const { userId } = req.body;
 
   try {
     const posts = await PostModel.aggregate([
       {
-        $sort: { createdAt: -1 }, // Sort posts by creation date (newest first)
+        $sort: { createdAt: -1 },
       },
       {
         $lookup: {
@@ -38,7 +38,7 @@ postRouter.get("/",  async (req, res) => {
       {
         $lookup: {
           from: "users",
-          localField: "userId", // Assuming userId field in posts collection
+          localField: "userId",
           foreignField: "_id",
           as: "user",
         },
@@ -53,6 +53,7 @@ postRouter.get("/",  async (req, res) => {
           "user.photoURL": 1,
           blogHeader: 1,
           view: 1,
+          url: 1,
         },
       },
     ]);
@@ -72,12 +73,11 @@ postRouter.get("/",  async (req, res) => {
   }
 });
 
-
 //Individual post
 postRouter.get("/:url", async (req, res) => {
   const { url } = req.params;
   try {
-    const post = await PostModel.findOne({url});
+    const post = await PostModel.findOne({ url });
     if (!post) {
       return res
         .status(httpStatus.NOT_FOUND)
