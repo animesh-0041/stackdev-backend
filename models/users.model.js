@@ -40,6 +40,14 @@ const userSchema = mongoose.Schema(
       required: true,
       enum: ["Google", "Github", "EmailAndPassword"],
     },
+    followers: {
+      type: [String],
+      default: [],
+    },
+    following: {
+      type: [String],
+      default: [],
+    },
   },
   {
     versionKey: false,
