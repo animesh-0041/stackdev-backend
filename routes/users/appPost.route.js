@@ -74,10 +74,10 @@ postRouter.get("/",  async (req, res) => {
 
 
 //Individual post
-postRouter.get("/:postId", async (req, res) => {
-  const { postId } = req.params;
+postRouter.get("/:url", async (req, res) => {
+  const { url } = req.params;
   try {
-    const post = await PostModel.findById(postId);
+    const post = await PostModel.findOne({url});
     if (!post) {
       return res
         .status(httpStatus.NOT_FOUND)
