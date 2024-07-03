@@ -45,7 +45,6 @@ postRouter.get("/", async (req, res) => {
       },
       {
         $project: {
-          content: 1,
           tag: 1,
           createdAt: 1,
           likes: 1,
@@ -77,15 +76,18 @@ postRouter.get("/", async (req, res) => {
 postRouter.get("/:url", async (req, res) => {
   const { url } = req.params;
   try {
-    const post = await PostModel.findOne({ url });
+    const post = await PostModel.aggregate([
+      { $match: { url } },
+      { $project: { blogHeader: 0 } },
+    ]);
     if (!post) {
       return res
         .status(httpStatus.NOT_FOUND)
         .json({ message: "Post not found" });
     }
-    res.status(httpStatus.OK).json({ post });
+    return res.status(httpStatus.OK).json(post[0]);
   } catch (error) {
-    res
+    return res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json({ error: "Failed to fetch post" });
   }
