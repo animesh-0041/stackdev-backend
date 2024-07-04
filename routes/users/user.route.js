@@ -19,7 +19,7 @@ userRouter.post("/signup", async (req, res) => {
         { userId: existingUser._id, name: existingUser.name },
         process.env.JWT_SECRET,
         {
-          expiresIn: "24h",
+          expiresIn: "7d",
         }
       );
       return res.status(httpStatus.OK).json({
