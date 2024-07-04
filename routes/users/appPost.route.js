@@ -3,6 +3,7 @@ const { auth } = require("../../middlewares/auth.middlewares");
 const { PostModel } = require("../../models/post.model");
 const { httpStatus } = require("../../config/lib/statusCode");
 const { LikeModel } = require("../../models/postLike.model");
+const { conditionalAuth } = require("../../helpers/conditionalAuth");
 const postRouter = express.Router();
 
 // create a post
@@ -73,19 +74,40 @@ postRouter.get("/", async (req, res) => {
 });
 
 //Individual post
-postRouter.get("/:url", async (req, res) => {
+postRouter.get("/:url", conditionalAuth, async (req, res) => {
   const { url } = req.params;
+  const { userId } = req.body;
+  let post = null;
   try {
-    const post = await PostModel.aggregate([
-      { $match: { url } },
-      { $project: { blogHeader: 0 } },
-    ]);
-    if (!post) {
-      return res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: "Post not found" });
+    if (userId) {
+      post = await PostModel.aggregate([
+        { $match: { url } },
+        { $project: { blogHeader: 0 } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+      ]);
+    } else {
+      post = await PostModel.aggregate([
+        { $match: { url } },
+        { $project: { blogHeader: 0 } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+      ]);
     }
-    return res.status(httpStatus.OK).json(post[0]);
+    post = { ...post[0], userDetails: post[0].userDetails[0] };
+    return res.status(httpStatus.OK).json(post);
   } catch (error) {
     return res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
