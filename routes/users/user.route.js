@@ -23,7 +23,7 @@ userRouter.post("/signup", async (req, res) => {
         }
       );
       return res.status(httpStatus.OK).json({
-        existUpdatedDetails,
+        user: existingUser,
         token,
         message: "you are already registered",
       });
