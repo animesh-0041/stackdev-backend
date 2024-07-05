@@ -77,37 +77,34 @@ postRouter.get("/", async (req, res) => {
 postRouter.get("/:url", conditionalAuth, async (req, res) => {
   const { url } = req.params;
   const { userId } = req.body;
-  let post = null;
   try {
-    if (userId) {
-      post = await PostModel.aggregate([
-        { $match: { url } },
-        { $project: { blogHeader: 0 } },
-        {
-          $lookup: {
-            from: "users",
-            localField: "userId",
-            foreignField: "_id",
-            as: "userDetails",
-          },
+    let post = await PostModel.aggregate([
+      { $match: { url } },
+      { $project: { blogHeader: 0 } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "userDetails",
         },
-      ]);
-    } else {
-      post = await PostModel.aggregate([
-        { $match: { url } },
-        { $project: { blogHeader: 0 } },
-        {
-          $lookup: {
-            from: "users",
-            localField: "userId",
-            foreignField: "_id",
-            as: "userDetails",
-          },
-        },
-      ]);
+      },
+    ]);
+    if (!post || post.length === 0) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "Post not found" });
     }
     post = { ...post[0], userDetails: post[0].userDetails[0] };
-    return res.status(httpStatus.OK).json(post);
+    let isLikeByUser = false;
+    if (userId && post.likes && post.likes.hasOwnProperty(userId))
+      isLikeByUser = true;
+    const updatedPost = {
+      ...post,
+      likes: undefined,
+      isLikeByUser,
+    };
+    return res.status(httpStatus.OK).json(updatedPost);
   } catch (error) {
     return res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
