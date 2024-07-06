@@ -32,7 +32,12 @@ const postSchema = mongoose.Schema(
     },
     blogHeader: {
       type: {},
-      required: true,
+      default: null,
+    },
+    likes: {
+      type: Map,
+      of: Date,
+      default: {},
     },
   },
   {
