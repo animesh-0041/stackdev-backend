@@ -20,7 +20,7 @@ postRouter.post("/create", auth, async (req, res) => {
   }
 });
 // Add a route to fetch all posts
-postRouter.get("/", async (req, res) => {
+postRouter.get("/allposts", async (req, res) => {
   const { userId } = req.body;
 
   try {
@@ -74,7 +74,7 @@ postRouter.get("/", async (req, res) => {
 });
 
 //Individual post
-postRouter.get("/:url", conditionalAuth, async (req, res) => {
+postRouter.get("/individual/:url", conditionalAuth, async (req, res) => {
   const { url } = req.params;
   const { userId } = req.body;
   try {
@@ -112,7 +112,6 @@ postRouter.get("/:url", conditionalAuth, async (req, res) => {
   }
 });
 
-
 //search post
 postRouter.get("/search", async (req, res) => {
   const { q } = req.query;
@@ -120,10 +119,10 @@ postRouter.get("/search", async (req, res) => {
   try {
     const items = await PostModel.find({
       $or: [
-        { "blogHeader.header.data.text": { $regex: query, $options: "i" } },
-        { "blogHeader.paragraph.data.text": { $regex: query, $options: "i" } },
-        { createdBy: { $regex: query, $options: "i" } },
-        { tag: { $elemMatch: { $regex: query, $options: "i" } } },
+        { "blogHeader.header.data.text": { $regex: q, $options: "i" } },
+        { "blogHeader.paragraph.data.text": { $regex: q, $options: "i" } },
+        { createdBy: { $regex: q, $options: "i" } },
+        { tag: { $elemMatch: { $regex: q, $options: "i" } } },
       ],
     });
 
