@@ -112,4 +112,32 @@ postRouter.get("/:url", conditionalAuth, async (req, res) => {
   }
 });
 
+
+//search post
+postRouter.get("/search", async (req, res) => {
+  const { q } = req.query;
+
+  try {
+    const items = await PostModel.find({
+      $or: [
+        { "blogHeader.header.data.text": { $regex: query, $options: "i" } },
+        { "blogHeader.paragraph.data.text": { $regex: query, $options: "i" } },
+        { createdBy: { $regex: query, $options: "i" } },
+        { tag: { $elemMatch: { $regex: query, $options: "i" } } },
+      ],
+    });
+
+    if (items.length === 0) {
+      return res.status(httpStatus.OK).json({ msg: "No search result" });
+    }
+
+    res.status(httpStatus.OK).json({ items });
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch blog posts" });
+  }
+});
+
 module.exports = { postRouter };
