@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const { auth } = require("../../middlewares/auth.middlewares");
 const { httpStatus } = require("../../config/lib/statusCode");
 const { commentModel } = require("../../models/coments.model");
@@ -31,9 +32,15 @@ commentRouter.post("/comment/:postId", auth, async (req, res) => {
 //get comment
 commentRouter.get("/comments", conditionalAuth, async (req, res) => {
   const { postId, commentId } = req.query;
+  let comments;
   try {
-    const comments = await commentModel.aggregate([
-      { $match: { postId: postId, parentCommentId: null } },
+    comments = await commentModel.aggregate([
+      {
+        $match: {
+          postId: new mongoose.Types.ObjectId(postId),
+          parentCommentId: null,
+        },
+      },
       {
         $lookup: {
           from: "comments",
@@ -50,7 +57,22 @@ commentRouter.get("/comments", conditionalAuth, async (req, res) => {
           as: "userDetails",
         },
       },
-      
+      {
+        $unwind: {
+          path: "$userDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          repliesCount: { $size: "$replies" },
+        },
+      },
+      {
+        $project: {
+          replies: 0,
+        },
+      },
     ]);
 
     return res.status(httpStatus.OK).json(comments);
@@ -59,56 +81,6 @@ commentRouter.get("/comments", conditionalAuth, async (req, res) => {
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json({ message: "Internal server error", error });
   }
-
-  // try {
-  //   let comments = [];
-
-  //   if (commentId) {
-  //     // Fetch nested comments for the given commentId
-  //     comments = await commentModel.find({
-  //       parentCommentId: commentId,
-  //     });
-  //   } else if (postId) {
-  //     // Fetch top-level comments for the given postId
-  //     comments = await commentModel.find({
-  //       postId,
-  //       parentCommentId: null,
-  //     });
-  //   } else {
-  //     return res
-  //       .status(httpStatus.BAD_REQUEST)
-  //       .json({ message: "postId or commentId is required" });
-  //   }
-
-  //   // Create an array of promises to check for child comments and count them
-  //   const commentsWithChildCountPromises = comments.map(async (comment) => {
-  //     const childCommentCount = await commentModel.countDocuments({
-  //       parentCommentId: comment._id,
-  //     });
-  //     return {
-  //       ...comment.toObject(),
-  //       isTopLevelComment: childCommentCount === 0,
-  //       childCommentCount,
-  //     };
-  //   });
-
-  //   const commentsWithChildCount = await Promise.all(
-  //     commentsWithChildCountPromises
-  //   );
-
-  //   res.status(httpStatus.OK).json(commentsWithChildCount);
-  // } catch (error) {
-  //   console.error("Error fetching comments:", error);
-  //   res
-  //     .status(httpStatus.INTERNAL_SERVER_ERROR)
-  //     .json({ message: "Internal server error" });
-  // }
 });
 
 module.exports = { commentRouter };
-
-// for (const comment of comments) {
-//   var childComments = await commentModel.countDocuments({ parentCommentId: comment._id });
-// }
-
-// console.log("Comments with child counts:", childComments);
