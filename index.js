@@ -19,7 +19,7 @@ app.get("/test", auth, (req, res) => {
 app.use("/api/user", userRouter);
 app.use("/api/post", postRouter);
 app.use("/api/post", likeRouter);
-app.use("/api/post", commentRouter);
+app.use("/api/blog", commentRouter);
 
 app.listen(5000, async () => {
   try {

@@ -1,10 +1,6 @@
 const mongoose = require("mongoose");
 
 const commentSchema = mongoose.Schema({
-  user: {
-    type: String,
-    required: true,
-  },
   text: {
     type: String,
     required: true,
@@ -24,6 +20,19 @@ const commentSchema = mongoose.Schema({
   parentCommentId: {
     type: mongoose.Schema.Types.ObjectId,
     default: null,
+  },
+  tags: {
+    type: String,
+    default: null,
+    validate: {
+      validator: function (value) {
+        if (this.parentCommentId) {
+          return value !== null;
+        }
+        return true;
+      },
+      message: "Tags are required when parentCommentId is present.",
+    },
   },
 });
 const commentModel = mongoose.model("comment", commentSchema);
