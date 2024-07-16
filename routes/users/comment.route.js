@@ -7,8 +7,8 @@ const { UserModel } = require("../../models/users.model");
 const { conditionalAuth } = require("../../helpers/conditionalAuth");
 const commentRouter = express.Router();
 // comment post
-commentRouter.post("/comment/:postId", auth, async (req, res) => {
-  const { postId } = req.params;
+commentRouter.post("/comment", auth, async (req, res) => {
+  const { postId } = req.body;
 
   try {
     const comment = new commentModel({
@@ -33,48 +33,77 @@ commentRouter.post("/comment/:postId", auth, async (req, res) => {
 commentRouter.get("/comments", conditionalAuth, async (req, res) => {
   const { postId, commentId } = req.query;
   let comments;
+  if (!postId) {
+    return res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: "postId is required" });
+  }
   try {
-    comments = await commentModel.aggregate([
-      {
-        $match: {
-          postId: new mongoose.Types.ObjectId(postId),
-          parentCommentId: null,
+    if (postId && commentId) {
+      comments = await commentModel.aggregate([
+        {
+          $match: {
+            postId: new mongoose.Types.ObjectId(postId),
+            parentCommentId: new mongoose.Types.ObjectId(commentId),
+          },
         },
-      },
-      {
-        $lookup: {
-          from: "comments",
-          localField: "_id",
-          foreignField: "parentCommentId",
-          as: "replies",
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userDetails",
+          },
         },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "userDetails",
+        {
+          $unwind: {
+            path: "$userDetails",
+            preserveNullAndEmptyArrays: true,
+          },
         },
-      },
-      {
-        $unwind: {
-          path: "$userDetails",
-          preserveNullAndEmptyArrays: true,
+      ]);
+    } else {
+      comments = await commentModel.aggregate([
+        {
+          $match: {
+            postId: new mongoose.Types.ObjectId(postId),
+            parentCommentId: null,
+          },
         },
-      },
-      {
-        $addFields: {
-          repliesCount: { $size: "$replies" },
+        {
+          $lookup: {
+            from: "comments",
+            localField: "_id",
+            foreignField: "parentCommentId",
+            as: "replies",
+          },
         },
-      },
-      {
-        $project: {
-          replies: 0,
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userDetails",
+          },
         },
-      },
-    ]);
-
+        {
+          $unwind: {
+            path: "$userDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            repliesCount: { $size: "$replies" },
+          },
+        },
+        {
+          $project: {
+            replies: 0,
+          },
+        },
+      ]);
+    }
     return res.status(httpStatus.OK).json(comments);
   } catch (error) {
     res
