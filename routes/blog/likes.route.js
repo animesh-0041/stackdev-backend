@@ -1,7 +1,7 @@
 const express = require("express");
-const { auth } = require("../../../middlewares/auth.middlewares");
-const { PostModel } = require("../../../models/post.model");
-const { httpStatus } = require("../../../config/lib/statusCode");
+const { auth } = require("../../middlewares/auth.middlewares");
+const { PostModel } = require("../../models/post.model");
+const { httpStatus } = require("../../config/lib/statusCode");
 const likeRouter = express.Router();
 
 likeRouter.post("/like/:url", auth, async (req, res) => {

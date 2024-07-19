@@ -3,6 +3,9 @@ const userRouter = express.Router();
 const jwt = require("jsonwebtoken");
 const { UserModel } = require("../../models/users.model");
 const { httpStatus } = require("../../config/lib/statusCode");
+const { v4: uuid } = require("uuid");
+const { auth } = require("../../middlewares/auth.middlewares");
+const { mongoose } = require("mongoose");
 
 //-------Register User-----------------
 userRouter.post("/signup", async (req, res) => {
@@ -29,7 +32,9 @@ userRouter.post("/signup", async (req, res) => {
       });
     }
     // create new user
-    const user = new UserModel(req.body);
+    const userName = name?.split(" ")[0] + uuid().replace(/-/g, "").slice(0, 6);
+    console.log(userName);
+    const user = new UserModel({ ...req.body, userName });
     await user.save();
     const token = jwt.sign(
       { userId: user._id, name: user.name },
@@ -44,7 +49,25 @@ userRouter.post("/signup", async (req, res) => {
   }
 });
 
-// -------Login User-----------------
-// (will be taken care in future)
+// get user profile details
+userRouter.get("/profile", auth, async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const userDetails = await UserModel.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(userId) } },
+      {
+        $lookup: {
+          from: "posts",
+          localField: "_id",
+          foreignField: "userId",
+          as: "posts",
+        },
+      },
+    ]);
+    res.status(httpStatus.OK).json(userDetails[0]);
+  } catch (error) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
+  }
+});
 
 module.exports = { userRouter };

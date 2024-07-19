@@ -1,11 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const { connection } = require("./config/db");
-const { userRouter } = require("./routes/users/user.route");
 const { auth } = require("./middlewares/auth.middlewares");
-const { postRouter } = require("./routes/users/appPost.route");
-const { commentRouter } = require("./routes/users/comment.route");
-const { likeRouter } = require("./routes/users/blogPost/likes.route");
+const {userRouter} =require("./routes/blog/user.route")
+const {postRouter} =require("./routes/blog/appPost.route")
+const {commentRouter} =require("./routes/blog/comment.route")
+const {likeRouter} =require("./routes/blog/likes.route")
 const app = express();
 app.use(express.json());
 app.use(cors());
