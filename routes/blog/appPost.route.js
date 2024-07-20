@@ -149,6 +149,8 @@ postRouter.get("/search", async (req, res) => {
           "blogHeader.paragraph.data.text": 1,
           "blogHeader.image.data.url": 1,
           createdBy: 1,
+          createdAt: 1,
+          url: 1,
           tag: 1,
           userDetails: 1,
         },
