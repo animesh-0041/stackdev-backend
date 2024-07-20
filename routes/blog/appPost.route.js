@@ -115,23 +115,23 @@ postRouter.get("/individual/:url", conditionalAuth, async (req, res) => {
 });
 
 //search post
-postRouter.get("/search/:query", async (req, res) => {
-  const { query } = req.params;
+postRouter.get("/search", async (req, res) => {
+  const { q } = req.query;
 
   try {
     const items = await PostModel.aggregate([
       {
         $match: {
           $or: [
-            { "blogHeader.header.data.text": { $regex: query, $options: "i" } },
+            { "blogHeader.header.data.text": { $regex: q, $options: "i" } },
             {
               "blogHeader.paragraph.data.text": {
-                $regex: query,
+                $regex: q,
                 $options: "i",
               },
             },
-            { createdBy: { $regex: query, $options: "i" } },
-            { tag: { $elemMatch: { $regex: query, $options: "i" } } },
+            { createdBy: { $regex: q, $options: "i" } },
+            { tag: { $elemMatch: { $regex: q, $options: "i" } } },
           ],
         },
       },
@@ -147,6 +147,7 @@ postRouter.get("/search/:query", async (req, res) => {
         $project: {
           "blogHeader.header.data.text": 1,
           "blogHeader.paragraph.data.text": 1,
+          "blogHeader.image.data.url": 1,
           createdBy: 1,
           tag: 1,
           userDetails: 1,
