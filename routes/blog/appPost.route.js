@@ -123,15 +123,27 @@ postRouter.get("/search", async (req, res) => {
       {
         $match: {
           $or: [
-            { "blogHeader.header.data.text": { $regex: q, $options: "i" } },
-            {
-              "blogHeader.paragraph.data.text": {
-                $regex: q,
-                $options: "i",
-              },
-            },
+            // { "blogHeader.header.data.text": { $regex: q, $options: "i" } },
+            // {
+            //   "blogHeader.paragraph.data.text": {
+            //     $regex: q,
+            //     $options: "i",
+            //   },
+            // },
             { createdBy: { $regex: q, $options: "i" } },
             { tag: { $elemMatch: { $regex: q, $options: "i" } } },
+            {
+              content: {
+                $elemMatch: {
+                  $or: [
+                    { "data.text": { $regex: query, $options: "i" } },
+                    { "data.caption": { $regex: query, $options: "i" } },
+                    { "data.code": { $regex: query, $options: "i" } },
+                    { "data.html": { $regex: query, $options: "i" } },
+                  ],
+                },
+              },
+            },
           ],
         },
       },
