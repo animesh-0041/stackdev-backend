@@ -136,10 +136,10 @@ postRouter.get("/search", async (req, res) => {
               content: {
                 $elemMatch: {
                   $or: [
-                    { "data.text": { $regex: query, $options: "i" } },
-                    { "data.caption": { $regex: query, $options: "i" } },
-                    { "data.code": { $regex: query, $options: "i" } },
-                    { "data.html": { $regex: query, $options: "i" } },
+                    { "data.text": { $regex: q, $options: "i" } },
+                    { "data.caption": { $regex: q, $options: "i" } },
+                    { "data.code": { $regex: q, $options: "i" } },
+                    { "data.html": { $regex: q, $options: "i" } },
                   ],
                 },
               },
