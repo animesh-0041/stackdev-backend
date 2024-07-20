@@ -116,7 +116,7 @@ postRouter.get("/individual/:url", conditionalAuth, async (req, res) => {
 });
 
 //search post
-postRouter.get("/search", async (req, res) => {
+postRouter.get("/search/", async (req, res) => {
   const { q } = req.query;
 
   try {
@@ -165,21 +165,17 @@ postRouter.get("/search", async (req, res) => {
 
     const users = await UserModel.find({
       $or: [
-        { name: { $regex: query, $options: "i" } },
-        { userName: { $regex: query, $options: "i" } },
+        { name: { $regex: q, $options: "i" } },
+        { userName: { $regex: q, $options: "i" } },
       ],
     });
 
-    if (items.length === 0 && users.length === 0) {
+    if (posts.length === 0 && users.length === 0) {
       return res.status(httpStatus.OK).json({ msg: "No search result" });
     }
 
-    res
-      .status(httpStatus.OK)
-      .json({ msg: "Search results", posts: posts, users: users });
-
-      
-    } catch (error) {
+    res.status(httpStatus.OK).json({ posts: posts, users: users });
+  } catch (error) {
     console.error("Error fetching blog posts:", error);
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
