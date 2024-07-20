@@ -1,6 +1,7 @@
 const express = require("express");
 const { auth } = require("../../middlewares/auth.middlewares");
 const { PostModel } = require("../../models/post.model");
+const { UserModel } = require("../../models/users.model");
 const { httpStatus } = require("../../config/lib/statusCode");
 const { LikeModel } = require("../../models/postLike.model");
 const { conditionalAuth } = require("../../helpers/conditionalAuth");
@@ -119,17 +120,10 @@ postRouter.get("/search", async (req, res) => {
   const { q } = req.query;
 
   try {
-    const items = await PostModel.aggregate([
+    const posts = await PostModel.aggregate([
       {
         $match: {
           $or: [
-            // { "blogHeader.header.data.text": { $regex: q, $options: "i" } },
-            // {
-            //   "blogHeader.paragraph.data.text": {
-            //     $regex: q,
-            //     $options: "i",
-            //   },
-            // },
             { createdBy: { $regex: q, $options: "i" } },
             { tag: { $elemMatch: { $regex: q, $options: "i" } } },
             {
@@ -169,11 +163,20 @@ postRouter.get("/search", async (req, res) => {
       },
     ]);
 
-    if (items.length === 0) {
+    const users = await UserModel.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { userName: { $regex: query, $options: "i" } },
+      ],
+    });
+
+    if (items.length === 0 && users.length === 0) {
       return res.status(httpStatus.OK).json({ msg: "No search result" });
     }
 
-    res.status(httpStatus.OK).json({ items });
+    res
+      .status(httpStatus.OK)
+      .json({ msg: "Search results", posts: posts, users: users });
   } catch (error) {
     console.error("Error fetching blog posts:", error);
     res
