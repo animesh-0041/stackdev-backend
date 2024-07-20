@@ -177,7 +177,9 @@ postRouter.get("/search", async (req, res) => {
     res
       .status(httpStatus.OK)
       .json({ msg: "Search results", posts: posts, users: users });
-  } catch (error) {
+
+      
+    } catch (error) {
     console.error("Error fetching blog posts:", error);
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
