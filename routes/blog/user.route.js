@@ -61,7 +61,7 @@ userRouter.get("/profile",  async (req, res) => {
           from: "posts",
           localField: "username",
           foreignField: "username",
-          as: "posts",
+          as: "data",
         },
       },
     ]);
