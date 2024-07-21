@@ -53,7 +53,7 @@ postRouter.get("/allposts", async (req, res) => {
           "user.name": 1,
           "user.photoURL": 1,
           "user._id": 1,
-          "user.userName": 1,
+          "user.username": 1,
           blogHeader: 1,
           view: 1,
           url: 1,

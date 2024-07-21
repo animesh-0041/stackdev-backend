@@ -55,12 +55,12 @@ userRouter.get("/profile",  async (req, res) => {
   const {username,category}=req.query
   try {
     const userDetails = await UserModel.aggregate([
-      { $match: { _id: new mongoose.Types.ObjectId(userId) } },
+      { $match: { username } },
       {
         $lookup: {
           from: "posts",
-          localField: "_id",
-          foreignField: "userId",
+          localField: "username",
+          foreignField: "username",
           as: "posts",
         },
       },
