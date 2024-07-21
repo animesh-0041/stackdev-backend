@@ -15,7 +15,7 @@ userRouter.post("/signup", async (req, res) => {
     const existingUser = await UserModel.findOneAndUpdate(
       { uIdByFirebase },
       { name, photoURL },
-      { new: true, upsert: false, projection: { _id: 1, name: 1, photoURL: 1 } }
+      { new: true, upsert: false, projection: { _id: 1, name: 1, photoURL: 1,userName:1 } }
     );
 
     if (existingUser) {
