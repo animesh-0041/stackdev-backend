@@ -6,6 +6,7 @@ const { httpStatus } = require("../../config/lib/statusCode");
 const { v4: uuid } = require("uuid");
 const { auth } = require("../../middlewares/auth.middlewares");
 const { mongoose } = require("mongoose");
+const { conditionalAuth } = require("../../helpers/conditionalAuth");
 
 //-------Register User-----------------
 userRouter.post("/signup", async (req, res) => {
@@ -15,12 +16,12 @@ userRouter.post("/signup", async (req, res) => {
     const existingUser = await UserModel.findOneAndUpdate(
       { uIdByFirebase },
       { name, photoURL },
-      { new: true, upsert: false, projection: { _id: 1, name: 1, photoURL: 1,userName:1 } }
+      { new: true, upsert: false, projection: { _id: 1, name: 1, photoURL: 1,username:1 } }
     );
 
     if (existingUser) {
       const token = jwt.sign(
-        { userId: existingUser._id, name: existingUser.name },
+        { userId: existingUser._id, name: existingUser.name,username:existingUser.username },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
@@ -32,12 +33,12 @@ userRouter.post("/signup", async (req, res) => {
       });
     }
     // create new user
-    const userName = name?.split(" ")[0] + uuid().replace(/-/g, "").slice(0, 6);
-    console.log(userName);
-    const user = new UserModel({ ...req.body, userName });
+    const username = name?.split(" ")[0] + uuid().replace(/-/g, "").slice(0, 6);
+    console.log(username);
+    const user = new UserModel({ ...req.body, username });
     await user.save();
     const token = jwt.sign(
-      { userId: user._id, name: user.name },
+      { userId: user._id, name: user.name,username:user.username },
       process.env.JWT_SECRET,
       {
         expiresIn: "24h",
@@ -50,8 +51,8 @@ userRouter.post("/signup", async (req, res) => {
 });
 
 // get user profile details
-userRouter.get("/profile", auth, async (req, res) => {
-  const { userId } = req.body;
+userRouter.get("/profile",  async (req, res) => {
+  const {username,category}=req.query
   try {
     const userDetails = await UserModel.aggregate([
       { $match: { _id: new mongoose.Types.ObjectId(userId) } },
