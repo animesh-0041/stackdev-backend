@@ -156,6 +156,7 @@ postRouter.get("/search/", async (req, res) => {
               "blogHeader.header.data.text": 1,
               "blogHeader.paragraph.data.text": 1,
               "blogHeader.image.data.url": 1,
+              "blogHeader.image.data.file.url": 1,
               createdBy: 1,
               createdAt: 1,
               url: 1,
@@ -186,7 +187,6 @@ postRouter.get("/search/", async (req, res) => {
       default:
         return res.status(httpStatus.OK).json({ msg: "No search result" });
     }
-
   } catch (error) {
     console.error("Error fetching blog posts:", error);
     res
