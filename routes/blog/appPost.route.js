@@ -117,64 +117,76 @@ postRouter.get("/individual/:url", conditionalAuth, async (req, res) => {
 
 //search post
 postRouter.get("/search/", async (req, res) => {
-  const { q } = req.query;
+  const { q, type } = req.query;
 
   try {
-    const posts = await PostModel.aggregate([
-      {
-        $match: {
-          $or: [
-            { createdBy: { $regex: q, $options: "i" } },
-            { tag: { $elemMatch: { $regex: q, $options: "i" } } },
-            {
-              content: {
-                $elemMatch: {
-                  $or: [
-                    { "data.text": { $regex: q, $options: "i" } },
-                    { "data.caption": { $regex: q, $options: "i" } },
-                    { "data.code": { $regex: q, $options: "i" } },
-                    { "data.html": { $regex: q, $options: "i" } },
-                  ],
+    switch (type) {
+      case "stories":
+        const posts = await PostModel.aggregate([
+          {
+            $match: {
+              $or: [
+                { createdBy: { $regex: q, $options: "i" } },
+                { tag: { $elemMatch: { $regex: q, $options: "i" } } },
+                {
+                  content: {
+                    $elemMatch: {
+                      $or: [
+                        { "data.text": { $regex: q, $options: "i" } },
+                        { "data.caption": { $regex: q, $options: "i" } },
+                        { "data.code": { $regex: q, $options: "i" } },
+                        { "data.html": { $regex: q, $options: "i" } },
+                      ],
+                    },
+                  },
                 },
-              },
+              ],
             },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "userId",
+              foreignField: "_id",
+              as: "userDetails",
+            },
+          },
+          {
+            $project: {
+              "blogHeader.header.data.text": 1,
+              "blogHeader.paragraph.data.text": 1,
+              "blogHeader.image.data.url": 1,
+              createdBy: 1,
+              createdAt: 1,
+              url: 1,
+              tag: 1,
+              userDetails: 1,
+            },
+          },
+        ]);
+
+        if (posts.length === 0) {
+          return res.status(httpStatus.OK).json({ msg: "No search result" });
+        }
+
+        return res.status(httpStatus.OK).json({ data: posts });
+      case "people":
+        const users = await UserModel.find({
+          $or: [
+            { name: { $regex: q, $options: "i" } },
+            { userName: { $regex: q, $options: "i" } },
           ],
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "userDetails",
-        },
-      },
-      {
-        $project: {
-          "blogHeader.header.data.text": 1,
-          "blogHeader.paragraph.data.text": 1,
-          "blogHeader.image.data.url": 1,
-          createdBy: 1,
-          createdAt: 1,
-          url: 1,
-          tag: 1,
-          userDetails: 1,
-        },
-      },
-    ]);
+        });
 
-    const users = await UserModel.find({
-      $or: [
-        { name: { $regex: q, $options: "i" } },
-        { userName: { $regex: q, $options: "i" } },
-      ],
-    });
+        if (users.length === 0) {
+          return res.status(httpStatus.OK).json({ msg: "No search result" });
+        }
 
-    if (posts.length === 0 && users.length === 0) {
-      return res.status(httpStatus.OK).json({ msg: "No search result" });
+        return res.status(httpStatus.OK).json({ data: users });
+      default:
+        return res.status(httpStatus.OK).json({ msg: "No search result" });
     }
 
-    res.status(httpStatus.OK).json({ posts: posts, users: users });
   } catch (error) {
     console.error("Error fetching blog posts:", error);
     res
