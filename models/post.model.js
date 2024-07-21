@@ -20,7 +20,7 @@ const postSchema = mongoose.Schema(
     },
     username: {
       type: String,
-      required: false,
+      required: true,
     },
     createdAt: {
       type: Date,

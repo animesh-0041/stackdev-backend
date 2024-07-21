@@ -9,7 +9,6 @@ const postRouter = express.Router();
 
 // create a post
 postRouter.post("/create", auth, async (req, res) => {
-  const { userId } = req.body;
   try {
     const newPost = new PostModel({
       ...req.body,

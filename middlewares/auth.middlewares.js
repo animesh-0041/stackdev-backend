@@ -11,6 +11,7 @@ const auth = (req, res, next) => {
     console.log(decoded);
     req.body.userId = decoded.userId;
     req.body.name = decoded.name;
+    req.body.username = decoded.username;
     next();
   } catch (error) {
     return res.status(httpStatus.UNAUTHORIZED).send({ msg: "session expired" });
