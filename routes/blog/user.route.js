@@ -16,12 +16,20 @@ userRouter.post("/signup", async (req, res) => {
     const existingUser = await UserModel.findOneAndUpdate(
       { uIdByFirebase },
       { name, photoURL },
-      { new: true, upsert: false, projection: { _id: 1, name: 1, photoURL: 1,username:1 } }
+      {
+        new: true,
+        upsert: false,
+        projection: { _id: 1, name: 1, photoURL: 1, username: 1 },
+      }
     );
 
     if (existingUser) {
       const token = jwt.sign(
-        { userId: existingUser._id, name: existingUser.name,username:existingUser.username },
+        {
+          userId: existingUser._id,
+          name: existingUser.name,
+          username: existingUser.username,
+        },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
@@ -38,7 +46,7 @@ userRouter.post("/signup", async (req, res) => {
     const user = new UserModel({ ...req.body, username });
     await user.save();
     const token = jwt.sign(
-      { userId: user._id, name: user.name,username:user.username },
+      { userId: user._id, name: user.name, username: user.username },
       process.env.JWT_SECRET,
       {
         expiresIn: "24h",
@@ -51,10 +59,21 @@ userRouter.post("/signup", async (req, res) => {
 });
 
 // get user profile details
-userRouter.get("/profile",  async (req, res) => {
-  const {username,category}=req.query
+userRouter.get("/profile", async (req, res) => {
+  const { username } = req.query;
   try {
-    const userDetails = await UserModel.aggregate([
+    const userDetails = await UserModel.aggregate([{ $match: { username } }]);
+    res.status(httpStatus.OK).json(userDetails[0]);
+  } catch (error) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
+  }
+});
+
+userRouter.get("/profile/post", async (req, res) => {
+  const { username, category } = req.query;
+  let data;
+  try {
+    data = await UserModel.aggregate([
       { $match: { username } },
       {
         $lookup: {
@@ -64,11 +83,21 @@ userRouter.get("/profile",  async (req, res) => {
           as: "data",
         },
       },
+      {
+        $project: {
+          "data.tag": 1,
+          "data.createdAt": 1,
+          "data.blogHeader": 1,
+          "data.view": 1,
+          "data.url": 1,
+          "data.username": 1,
+          "data._id": 1,
+        },
+      },
     ]);
-    res.status(httpStatus.OK).json(userDetails[0]);
+    res.status(httpStatus.OK).json(data[0].data);
   } catch (error) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }
 });
-
 module.exports = { userRouter };
