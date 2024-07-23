@@ -59,10 +59,32 @@ userRouter.post("/signup", async (req, res) => {
 });
 
 // get single user profile details
-userRouter.get("/profile", async (req, res) => {
+userRouter.get("/profile", conditionalAuth, async (req, res) => {
   const { username } = req.query;
+  const { userId } = req.body;
+  let userDetails;
   try {
-    const userDetails = await UserModel.aggregate([{ $match: { username } }]);
+    userDetails = await UserModel.aggregate([
+      { $match: { username } },
+      {
+        $addFields: {
+          followersCount: { $size: { $objectToArray: "$followers" } },
+          followingCount: { $size: { $objectToArray: "$following" } },
+        },
+      },
+    ]);
+    if (!userDetails.length) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "User not found" });
+    }
+    if (userId) {
+      const isFollowing = userDetails[0]?.followers.hasOwnProperty(userId);
+      userDetails[0].isFollowing = isFollowing;
+    } else {
+      userDetails[0].isFollowing = false;
+    }
+
     res.status(httpStatus.OK).json(userDetails[0]);
   } catch (error) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
