@@ -12,7 +12,7 @@ const { conditionalAuth } = require("../../helpers/conditionalAuth");
 userRouter.post("/signup", async (req, res) => {
   const { uIdByFirebase, name, photoURL } = req.body;
   try {
-    //if exist user already
+    //if already exist user
     const existingUser = await UserModel.findOneAndUpdate(
       { uIdByFirebase },
       { name, photoURL },
@@ -58,7 +58,7 @@ userRouter.post("/signup", async (req, res) => {
   }
 });
 
-// get user profile details
+// get single user profile details
 userRouter.get("/profile", async (req, res) => {
   const { username } = req.query;
   try {
@@ -69,6 +69,7 @@ userRouter.get("/profile", async (req, res) => {
   }
 });
 
+// get single user posts
 userRouter.get("/profile/post", async (req, res) => {
   const { username, category } = req.query;
   let data;
@@ -100,4 +101,45 @@ userRouter.get("/profile/post", async (req, res) => {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }
 });
+
+// follow and unfollow user
+userRouter.post("/follow", auth, async (req, res) => {
+  const { userId, followUserId } = req.body;
+
+  if (!userId || !followUserId) {
+    return res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: "User not found" });
+  }
+
+  try {
+    const user = await UserModel.findById(userId);
+    const followUser = await UserModel.findById(followUserId);
+
+    const isFollowing = user.following.has(followUserId);
+    if (isFollowing) {
+      // Unfollow user
+      user.following.delete(followUserId);
+      followUser.followers.delete(userId);
+    } else {
+      // Follow user
+      user.following.set(followUserId, new Date());
+      followUser.followers.set(userId, new Date());
+    }
+
+    await user.save();
+    await followUser.save();
+
+    return res.status(httpStatus.OK).json({
+      message: isFollowing
+        ? "User unfollowed successfully"
+        : "User followed successfully",
+    });
+  } catch (error) {
+    return res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Failed to follow/unfollow user", error });
+  }
+});
+
 module.exports = { userRouter };

@@ -41,12 +41,14 @@ const userSchema = mongoose.Schema(
       enum: ["Google", "Github", "EmailAndPassword"],
     },
     followers: {
-      type: [String],
-      default: [],
+      type: Map,
+      of: Date,
+      default: {},
     },
     following: {
-      type: [String],
-      default: [],
+      type: Map,
+      of: Date,
+      default: {},
     },
   },
   {

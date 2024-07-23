@@ -98,6 +98,7 @@ postRouter.get("/individual/:url", conditionalAuth, async (req, res) => {
         .status(httpStatus.NOT_FOUND)
         .json({ message: "Post not found" });
     }
+    await PostModel.updateOne({ url }, { $inc: { view: 1 } });
     post = { ...post[0], userDetails: post[0].userDetails[0] };
     let isLikeByUser = false;
     if (userId && post.likes && post.likes.hasOwnProperty(userId))
