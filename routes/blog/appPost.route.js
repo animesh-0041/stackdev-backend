@@ -196,4 +196,34 @@ postRouter.get("/search/", async (req, res) => {
   }
 });
 
+// delete post
+postRouter.delete("/delete/:url", auth, async (req, res) => {
+  const { url } = req.params;
+  try {
+    await PostModel.deleteOne({ url });
+    return res
+      .status(httpStatus.OK)
+      .json({ message: "Post deleted successfully" });
+  } catch (error) {
+    return res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to delete post" });
+  }
+});
+
+// update post
+postRouter.patch("/update/:url", auth, async (req, res) => {
+  const { url } = req.params;
+  try {
+    await PostModel.updateOne({ url }, { $set: { ...req.body } });
+    return res
+      .status(httpStatus.OK)
+      .json({ message: "Post updated successfully" });
+  } catch (error) {
+    return res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to update post" });
+  }
+});
+
 module.exports = { postRouter };
