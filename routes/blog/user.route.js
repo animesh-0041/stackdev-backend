@@ -103,7 +103,7 @@ userRouter.get("/profile/post", async (req, res) => {
 });
 
 // follow and unfollow user
-userRouter.post("/follow", auth, async (req, res) => {
+userRouter.post("/follow-unfollow", auth, async (req, res) => {
   const { userId, followUserId } = req.body;
 
   if (!userId || !followUserId) {
