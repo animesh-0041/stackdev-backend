@@ -156,6 +156,7 @@ userRouter.post("/follow-unfollow", auth, async (req, res) => {
       message: isFollowing
         ? "User unfollowed successfully"
         : "User followed successfully",
+        status:!isFollowing
     });
   } catch (error) {
     return res
