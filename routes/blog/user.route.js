@@ -96,29 +96,40 @@ userRouter.get("/profile/post", async (req, res) => {
   const { username, category } = req.query;
   let data;
   try {
-    data = await UserModel.aggregate([
-      { $match: { username } },
-      {
-        $lookup: {
-          from: "posts",
-          localField: "username",
-          foreignField: "username",
-          as: "data",
-        },
-      },
-      {
-        $project: {
-          "data.tag": 1,
-          "data.createdAt": 1,
-          "data.blogHeader": 1,
-          "data.view": 1,
-          "data.url": 1,
-          "data.username": 1,
-          "data._id": 1,
-        },
-      },
-    ]);
-    res.status(httpStatus.OK).json(data[0].data);
+    switch (category) {
+      case "stories":
+        data = await UserModel.aggregate([
+          { $match: { username } },
+          {
+            $lookup: {
+              from: "posts",
+              localField: "username",
+              foreignField: "username",
+              as: "data",
+            },
+          },
+          { $unwind: "$data" },
+          {
+            $project: {
+              _id: "$data._id",
+              tag: "$data.tag",
+              createdAt: "$data.createdAt",
+              blogHeader: "$data.blogHeader",
+              view: "$data.view",
+              url: "$data.url",
+              username: "$data.username",
+            },
+          },
+        ]);
+        break;
+      case "about":
+        data = await UserModel.findOne({ username });
+        break;
+      default:
+        res.status(httpStatus.BAD_REQUEST).json({ error: "Invalid category" });
+        break;
+    }
+    res.status(httpStatus.OK).json(data);
   } catch (error) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }
