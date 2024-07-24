@@ -163,6 +163,7 @@ postRouter.get("/search/", async (req, res) => {
               url: 1,
               tag: 1,
               userDetails: 1,
+              view: 1,
             },
           },
         ]);
