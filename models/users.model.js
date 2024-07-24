@@ -50,8 +50,49 @@ const userSchema = mongoose.Schema(
       of: Date,
       default: {},
     },
+    company: {
+      type: String,
+      default: null,
+    },
+    collage: {
+      type: String,
+      default: null,
+    },
+    school: {
+      type: String,
+      default: null,
+    },
+    current_city: {
+      type: String,
+      default: null,
+    },
+    add_hometown: {
+      type: String,
+      default: null,
+    },
+    gender: {
+      type: String,
+      default: null,
+    },
+    phoneNumber: {
+      type: String,
+      default: null,
+    },
+    birthday: {
+      type: String,
+      default: null,
+    },
+    skills: {
+      type: [String],
+      default: [],
+    },
+    bio: {
+      type: String,
+      default: null,
+    },
   },
   {
+    timestamps: true,
     versionKey: false,
   }
 );

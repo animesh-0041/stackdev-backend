@@ -156,12 +156,32 @@ userRouter.post("/follow-unfollow", auth, async (req, res) => {
       message: isFollowing
         ? "User unfollowed successfully"
         : "User followed successfully",
-        status:!isFollowing
+      status: !isFollowing,
     });
   } catch (error) {
     return res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json({ message: "Failed to follow/unfollow user", error });
+  }
+});
+
+// update user profile
+userRouter.patch("/update", auth, async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: "User not found" });
+  }
+  try {
+    await UserModel.updateOne({ _id: userId }, { $set: { ...req.body } });
+    return res
+      .status(httpStatus.OK)
+      .json({ message: "User updated successfully" });
+  } catch (error) {
+    return res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to update user" });
   }
 });
 
