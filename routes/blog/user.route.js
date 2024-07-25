@@ -19,7 +19,7 @@ userRouter.post("/signup", async (req, res) => {
       {
         new: true,
         upsert: false,
-        projection: { _id: 1, name: 1, photoURL: 1, username: 1 },
+        projection: { _id: 1, name: 1, photoURL: 1, username: 1, email: 1 },
       }
     );
 
@@ -37,22 +37,55 @@ userRouter.post("/signup", async (req, res) => {
       return res.status(httpStatus.OK).json({
         user: existingUser,
         token,
-        message: "You are already registered",
+        message: "You already registered login successfully",
       });
     }
     // create new user
     const username = name?.split(" ")[0] + uuid().replace(/-/g, "").slice(0, 6);
-    console.log(username);
     const user = new UserModel({ ...req.body, username });
     await user.save();
     const token = jwt.sign(
       { userId: user._id, name: user.name, username: user.username },
       process.env.JWT_SECRET,
       {
-        expiresIn: "24h",
+        expiresIn: "7d",
       }
     );
-    return res.status(httpStatus.CREATED).json({ user, token });
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      photoURL: user.photoURL,
+      username: user.username,
+      email: user.email,
+    };
+    return res
+      .status(httpStatus.CREATED)
+      .json({ userResponse, token, message: "User created successfully" });
+  } catch (error) {
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
+  }
+});
+
+//-------Login User-----------------
+userRouter.post("/login", async (req, res) => {
+  const { uIdByFirebase } = req.body;
+  try {
+    const user = await UserModel.findOne({ uIdByFirebase }).select(
+      "_id name photoURL username email"
+    );
+    if (!user) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "User not found" });
+    }
+    const token = jwt.sign(
+      { userId: user._id, name: user.name, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+    return res
+      .status(httpStatus.OK)
+      .json({ user, token, message: "User logged in successfully" });
   } catch (error) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }
