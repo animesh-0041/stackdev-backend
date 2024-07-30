@@ -8,6 +8,7 @@ const { likeRouter } = require("./routes/blog/likes.route");
 const { chatRouter } = require("./routes/blogChat/chat.route");
 const http = require("http");
 const { initializeSocketServer } = require("./sockets");
+const { booksRouter } = require("./routes/Books/book.router.js");
 
 const app = express();
 app.use(express.json());
@@ -22,6 +23,7 @@ app.use("/api/post", postRouter);
 app.use("/api/post", likeRouter);
 app.use("/api/blog", commentRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/books", booksRouter);
 
 // socket server
 const server = http.createServer(app);
