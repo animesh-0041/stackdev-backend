@@ -61,6 +61,9 @@ commentRouter.get("/comments", conditionalAuth, async (req, res) => {
             preserveNullAndEmptyArrays: true,
           },
         },
+        {
+          $sort: { createdAt: -1 },
+        },
       ]);
     } else {
       comments = await commentModel.aggregate([
@@ -101,6 +104,9 @@ commentRouter.get("/comments", conditionalAuth, async (req, res) => {
           $project: {
             replies: 0,
           },
+        },
+        {
+          $sort: { createdAt: -1 },
         },
       ]);
     }

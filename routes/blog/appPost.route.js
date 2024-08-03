@@ -26,8 +26,11 @@ postRouter.get("/allposts", async (req, res) => {
 
   try {
     const posts = await PostModel.aggregate([
+      // {
+      //   $sort: { createdAt: -1 },
+      // },
       {
-        $sort: { createdAt: -1 },
+        $sample: { size: Number.MAX_SAFE_INTEGER },
       },
       {
         $lookup: {
