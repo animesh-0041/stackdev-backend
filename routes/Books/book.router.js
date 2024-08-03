@@ -70,7 +70,11 @@ booksRouter.patch("/page/update/:url", auth, async (req, res) => {
     const findPage = await PagesModel.findOne({ url: url });
 
     if (findPage) {
-      const updateResult = await PagesModel.findOneAndUpdate({ url: url }, req?.body,{ new: true });
+      const updateResult = await PagesModel.findOneAndUpdate(
+        { url: url },
+        req?.body,
+        { new: true }
+      );
 
       res
         .status(httpStatus.CREATED)
@@ -98,6 +102,19 @@ booksRouter.get("/page/individual/:url", async (req, res) => {
     res
       .status(httpStatus.OK)
       .json({ data: book, msg: "Data fetch Successfully" });
+  } catch (error) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
+  }
+});
+
+booksRouter.patch("/page/delete", auth, async (req, res) => {
+  const { pageurl, bookurl, data } = req.body;
+
+  try {
+    await BooksModel.findOneAndUpdate({ url: bookurl }, data, { new: true });
+    await PagesModel.findOneAndDelete({ url: pageurl });
+
+    res.status(httpStatus.OK).json({ msg: "Page delete Successfully" });
   } catch (error) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }
