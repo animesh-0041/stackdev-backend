@@ -23,7 +23,15 @@ postRouter.post("/create", auth, async (req, res) => {
 // Add a route to fetch all posts
 postRouter.get("/allposts", async (req, res) => {
   const { userId } = req.body;
+  const { page = 1, limit = 20 } = req.query;
 
+  const pageNumber = parseInt(page, 10);
+  const pageSize = parseInt(limit, 10);
+  if (isNaN(pageNumber) || pageNumber < 1 || isNaN(pageSize) || pageSize < 1) {
+    return res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ error: "Invalid pagination parameters" });
+  }
   try {
     const posts = await PostModel.aggregate([
       // {
@@ -61,6 +69,12 @@ postRouter.get("/allposts", async (req, res) => {
           view: 1,
           url: 1,
         },
+      },
+      {
+        $skip: (pageNumber - 1) * pageSize,
+      },
+      {
+        $limit: pageSize,
       },
     ]);
 
@@ -227,6 +241,35 @@ postRouter.patch("/update/:url", auth, async (req, res) => {
     return res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json({ error: "Failed to update post" });
+  }
+});
+
+// bookmark blog post
+
+postRouter.post("/bookmark/:url", auth, async (req, res) => {
+  const { userId } = req.body;
+  const { url } = req.params;
+  try {
+    const post = await PostModel.findOne({ url });
+    if (!post) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "Post not found" });
+    }
+
+    if (user.bookmarks.has(post._id)) {
+      user.bookmarks.delete(post._id);
+    } else {
+      user.bookmarks.set(post._id, new Date());
+    }
+    await user.save();
+    return res
+      .status(httpStatus.OK)
+      .json({ message: "Post bookmarked successfully" });
+  } catch (error) {
+    return res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to bookmark post" });
   }
 });
 
