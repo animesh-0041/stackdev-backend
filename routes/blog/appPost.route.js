@@ -117,13 +117,28 @@ postRouter.get("/individual/:url", conditionalAuth, async (req, res) => {
     }
     await PostModel.updateOne({ url }, { $inc: { view: 1 } });
     post = { ...post[0], userDetails: post[0].userDetails[0] };
+
+    // Check if user has liked the post
     let isLikeByUser = false;
-    if (userId && post.likes && post.likes.hasOwnProperty(userId))
+    if (userId && post.likes && post.likes.hasOwnProperty(userId)) {
       isLikeByUser = true;
+    }
+
+    // Check if the post is bookmarked by the user
+    let isBookmarkedByUser = false;
+    if (
+      userId &&
+      post.bookmarkedBy &&
+      post.bookmarkedBy.hasOwnProperty(userId)
+    ) {
+      isBookmarkedByUser = true;
+    }
+    // some additional properties to the post
     const updatedPost = {
       ...post,
       likes: undefined,
       isLikeByUser,
+      isBookmarkedByUser,
     };
     return res.status(httpStatus.OK).json(updatedPost);
   } catch (error) {
