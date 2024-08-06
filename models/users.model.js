@@ -1,18 +1,5 @@
 const mongoose = require("mongoose");
 
-const bookmarkBlogSchema = new mongoose.Schema(
-  {
-    postId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
-      required: true,
-    },
-  },
-  {
-    timestamps: true,
-    versionKey: false,
-  }
-);
 const userSchema = mongoose.Schema(
   {
     name: {
@@ -62,10 +49,6 @@ const userSchema = mongoose.Schema(
       type: Map,
       of: Date,
       default: {},
-    },
-    bookmarksBlog: {
-      type: [bookmarkBlogSchema],
-      default: [],
     },
     company: {
       type: String,

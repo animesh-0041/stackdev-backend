@@ -30,6 +30,11 @@ const postSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    bookmarkedBy: {
+      type: Map,
+      of: Date,
+      default: {},
+    },
     url: {
       type: String,
       default: null,

@@ -153,6 +153,9 @@ userRouter.get("/profile/post", async (req, res) => {
               username: "$data.username",
             },
           },
+          {
+            $sort: { createdAt: -1 },
+          },
         ]);
         break;
       case "about":
