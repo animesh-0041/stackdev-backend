@@ -335,4 +335,42 @@ postRouter.get("/bookmark-blogs", auth, async (req, res) => {
   }
 });
 
+// recommended posts
+postRouter.get("/recommended-blogs", async (req, res) => {
+  try {
+    const recommendedPosts = await PostModel.aggregate([
+      {
+        $sample: { size: 3 },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $project: {
+          tag: 1,
+          createdAt: 1,
+          likes: 1,
+          "user.name": 1,
+          "user.photoURL": 1,
+          "user._id": 1,
+          "user.username": 1,
+          blogHeader: 1,
+          view: 1,
+          url: 1,
+        },
+      },
+    ]);
+    return res.status(httpStatus.OK).json(recommendedPosts);
+  } catch (error) {
+    return res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch recommended posts" });
+  }
+});
+
 module.exports = { postRouter };

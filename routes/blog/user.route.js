@@ -232,4 +232,40 @@ userRouter.patch("/update", auth, async (req, res) => {
   }
 });
 
+// auto recomendation user profile to a user
+userRouter.get("/recomendation-profile", async (req, res) => {
+  try {
+    const topUsers = await UserModel.aggregate([
+      {
+        $addFields: {
+          followersCount: { $size: { $objectToArray: "$followers" } },
+        },
+      },
+      { $sort: { followersCount: -1 } },
+      { $limit: 3 },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          username: 1,
+          photoURL: 1,
+          followersCount: 1,
+          bio: 1,
+          skills: 1,
+          company: 1,
+          current_city: 1,
+          collage: 1,
+        },
+      },
+    ]);
+
+    return res.status(httpStatus.OK).json(topUsers);
+  } catch (error) {
+    return res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to update user" });
+  }
+});
+
 module.exports = { userRouter };
