@@ -276,7 +276,7 @@ postRouter.delete("/bookmark/:url", auth, async (req, res) => {
 
     if (!userHasBookmarked) {
       return res
-        .status(httpStatus.BAD_REQUEST)
+        .status(httpStatus.OK)
         .json({ message: "Post is not bookmarked" });
     }
 
@@ -307,7 +307,7 @@ postRouter.post("/bookmark/:url", auth, async (req, res) => {
     const userHasBookmarked = post.bookmarkedBy.has(userIdStr);
     if (userHasBookmarked) {
       return res
-        .status(httpStatus.BAD_REQUEST)
+        .status(httpStatus.OK)
         .json({ message: "Post is already bookmarked" });
     }
     post.bookmarkedBy.set(userIdStr, new Date());
