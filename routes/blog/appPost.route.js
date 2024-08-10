@@ -259,8 +259,40 @@ postRouter.patch("/update/:url", auth, async (req, res) => {
   }
 });
 
-// bookmark blog post
+// remove blog from bookmark
+postRouter.delete("/bookmark/:url", auth, async (req, res) => {
+  const { userId } = req.body;
+  const { url } = req.params;
 
+  try {
+    const post = await PostModel.findOne({ url });
+    if (!post) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "Post not found" });
+    }
+    const userIdStr = userId.toString();
+    const userHasBookmarked = post.bookmarkedBy.has(userIdStr);
+
+    if (!userHasBookmarked) {
+      return res
+        .status(httpStatus.BAD_REQUEST)
+        .json({ message: "Post is not bookmarked" });
+    }
+
+    post.bookmarkedBy.delete(userIdStr);
+    await post.save();
+    return res
+      .status(httpStatus.OK)
+      .json({ message: "Post unbookmarked successfully" });
+  } catch (error) {
+    return res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to remove bookmark from post" });
+  }
+});
+
+// bookmark a blog
 postRouter.post("/bookmark/:url", auth, async (req, res) => {
   const { userId } = req.body;
   const { url } = req.params;
@@ -271,22 +303,18 @@ postRouter.post("/bookmark/:url", auth, async (req, res) => {
         .status(httpStatus.NOT_FOUND)
         .json({ message: "Post not found" });
     }
-    const postId = post._id.toString();
     const userIdStr = userId.toString();
     const userHasBookmarked = post.bookmarkedBy.has(userIdStr);
     if (userHasBookmarked) {
-      post.bookmarkedBy.delete(userIdStr);
-      await post.save();
       return res
-        .status(httpStatus.OK)
-        .json({ message: "Post unbookmarked successfully" });
-    } else {
-      post.bookmarkedBy.set(userIdStr, new Date());
-      await post.save();
-      return res
-        .status(httpStatus.OK)
-        .json({ message: "Post bookmarked successfully" });
+        .status(httpStatus.BAD_REQUEST)
+        .json({ message: "Post is already bookmarked" });
     }
+    post.bookmarkedBy.set(userIdStr, new Date());
+    await post.save();
+    return res
+      .status(httpStatus.OK)
+      .json({ message: "Post bookmarked successfully" });
   } catch (error) {
     return res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
