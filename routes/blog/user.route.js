@@ -60,7 +60,11 @@ userRouter.post("/signup", async (req, res) => {
     };
     return res
       .status(httpStatus.CREATED)
-      .json({ userResponse, token, message: "User created successfully" });
+      .json({
+        user: userResponse,
+        token,
+        message: "User created successfully",
+      });
   } catch (error) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }
