@@ -242,11 +242,15 @@ userRouter.get("/recomendation-profile", async (req, res) => {
     const topUsers = await UserModel.aggregate([
       {
         $addFields: {
-          followersCount: { $size: { $objectToArray: "$followers" } },
+          followersCount: { $size: { $ifNull: [{ $objectToArray: "$followers" }, []] } }
         },
       },
-      { $sort: { followersCount: -1 } },
-      { $limit: 3 },
+      {
+        $sort: { followersCount: -1 }
+      },
+      {
+        $limit: 3
+      },
       {
         $project: {
           _id: 1,
@@ -260,15 +264,16 @@ userRouter.get("/recomendation-profile", async (req, res) => {
           company: 1,
           current_city: 1,
           collage: 1,
-        },
+        }
       },
     ]);
-
+    
     return res.status(httpStatus.OK).json(topUsers);
+    
   } catch (error) {
     return res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to update user" });
+      .json({ error: "Failed to recommend user" });
   }
 });
 
