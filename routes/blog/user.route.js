@@ -10,12 +10,12 @@ const { conditionalAuth } = require("../../helpers/conditionalAuth");
 
 //-------Register User-----------------
 userRouter.post("/signup", async (req, res) => {
-  const { uIdByFirebase, name, photoURL } = req.body;
+  const { uIdByFirebase, name, photoURL, fcmToken } = req.body;
   try {
     //if already exist user
     const existingUser = await UserModel.findOneAndUpdate(
       { uIdByFirebase },
-      { name, photoURL },
+      { name, photoURL, fcmToken },
       {
         new: true,
         upsert: false,
@@ -33,7 +33,6 @@ userRouter.post("/signup", async (req, res) => {
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
-
       return res.status(httpStatus.OK).json({
         user: existingUser,
         token,
@@ -58,13 +57,11 @@ userRouter.post("/signup", async (req, res) => {
       username: user.username,
       email: user.email,
     };
-    return res
-      .status(httpStatus.CREATED)
-      .json({
-        user: userResponse,
-        token,
-        message: "User created successfully",
-      });
+    return res.status(httpStatus.CREATED).json({
+      user: userResponse,
+      token,
+      message: "User created successfully",
+    });
   } catch (error) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }
@@ -242,14 +239,16 @@ userRouter.get("/recomendation-profile", async (req, res) => {
     const topUsers = await UserModel.aggregate([
       {
         $addFields: {
-          followersCount: { $size: { $ifNull: [{ $objectToArray: "$followers" }, []] } }
+          followersCount: {
+            $size: { $ifNull: [{ $objectToArray: "$followers" }, []] },
+          },
         },
       },
       {
-        $sort: { followersCount: -1 }
+        $sort: { followersCount: -1 },
       },
       {
-        $limit: 3
+        $limit: 3,
       },
       {
         $project: {
@@ -264,12 +263,11 @@ userRouter.get("/recomendation-profile", async (req, res) => {
           company: 1,
           current_city: 1,
           collage: 1,
-        }
+        },
       },
     ]);
-    
+
     return res.status(httpStatus.OK).json(topUsers);
-    
   } catch (error) {
     return res
       .status(httpStatus.INTERNAL_SERVER_ERROR)

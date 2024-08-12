@@ -90,6 +90,10 @@ const userSchema = mongoose.Schema(
       type: String,
       default: null,
     },
+    fcmToken: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
