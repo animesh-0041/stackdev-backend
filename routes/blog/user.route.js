@@ -10,12 +10,12 @@ const { conditionalAuth } = require("../../helpers/conditionalAuth");
 
 //-------Register User-----------------
 userRouter.post("/signup", async (req, res) => {
-  const { uIdByFirebase, name, photoURL } = req.body;
+  const { uIdByFirebase, name, photoURL, fcmToken } = req.body;
   try {
     //if already exist user
     const existingUser = await UserModel.findOneAndUpdate(
       { uIdByFirebase },
-      { name, photoURL },
+      { name, photoURL, fcmToken },
       {
         new: true,
         upsert: false,
@@ -33,7 +33,6 @@ userRouter.post("/signup", async (req, res) => {
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
-
       return res.status(httpStatus.OK).json({
         user: existingUser,
         token,
@@ -58,13 +57,11 @@ userRouter.post("/signup", async (req, res) => {
       username: user.username,
       email: user.email,
     };
-    return res
-      .status(httpStatus.CREATED)
-      .json({
-        user: userResponse,
-        token,
-        message: "User created successfully",
-      });
+    return res.status(httpStatus.CREATED).json({
+      user: userResponse,
+      token,
+      message: "User created successfully",
+    });
   } catch (error) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }
@@ -242,11 +239,17 @@ userRouter.get("/recomendation-profile", async (req, res) => {
     const topUsers = await UserModel.aggregate([
       {
         $addFields: {
-          followersCount: { $size: { $objectToArray: "$followers" } },
+          followersCount: {
+            $size: { $ifNull: [{ $objectToArray: "$followers" }, []] },
+          },
         },
       },
-      { $sort: { followersCount: -1 } },
-      { $limit: 3 },
+      {
+        $sort: { followersCount: -1 },
+      },
+      {
+        $limit: 3,
+      },
       {
         $project: {
           _id: 1,
@@ -268,7 +271,7 @@ userRouter.get("/recomendation-profile", async (req, res) => {
   } catch (error) {
     return res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to update user" });
+      .json({ error: "Failed to recommend user" });
   }
 });
 

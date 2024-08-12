@@ -9,6 +9,9 @@ const { chatRouter } = require("./routes/blogChat/chat.route");
 const http = require("http");
 const { initializeSocketServer } = require("./sockets");
 const { booksRouter } = require("./routes/Books/book.router.js");
+const {
+  notificationRouter,
+} = require("./routes/notification/notification.route.js");
 
 const app = express();
 app.use(express.json());
@@ -24,6 +27,7 @@ app.use("/api/post", likeRouter);
 app.use("/api/blog", commentRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/books", booksRouter);
+app.use("/api/me", notificationRouter);
 
 // socket server
 const server = http.createServer(app);
