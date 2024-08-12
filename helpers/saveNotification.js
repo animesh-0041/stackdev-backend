@@ -10,5 +10,4 @@ const createNotification = async (newNotification) => {
     throw error;
   }
 };
-
 module.exports = { createNotification };
