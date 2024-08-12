@@ -26,7 +26,7 @@ likeRouter.post("/like/:url", auth, async (req, res) => {
 
     res
       .status(httpStatus.CREATED)
-      .json({ message: "Post like status updated", post });
+      .json({ message: "Post like status updated" });
   } catch (error) {
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
