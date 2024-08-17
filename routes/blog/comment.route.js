@@ -6,7 +6,6 @@ const { commentModel } = require("../../models/comments.model");
 const { UserModel } = require("../../models/users.model");
 const { conditionalAuth } = require("../../helpers/conditionalAuth");
 const { NotificationModel } = require("../../models/notification.model");
-const { mongoose } = require("mongoose");
 const commentRouter = express.Router();
 // comment post
 commentRouter.post("/comment", auth, async (req, res) => {
@@ -18,13 +17,6 @@ commentRouter.post("/comment", auth, async (req, res) => {
       postId,
       user: req.body.name,
       createdAt: new Date(),
-    });
-    const newNotification = new NotificationModel({
-      creator: new mongoose.Schema.Types.ObjectId(userId),
-      title: "New Comment on Your Post",
-      body: `Someone commented on your post:post.title"`,
-      targetUsers: [post.author._id],
-      url: `/posts/${postId}`,
     });
     await comment.save();
     res
