@@ -2,11 +2,13 @@ const { MessageModel } = require("../../models/message.modal");
 
 const handleSendMessage = (socket, io, userSockets) => {
   socket.on("send-message", async (data) => {
-    const { message, senderId, recieverId } = data;
+    console.log("send-message", data);
+    const { message, senderId, recieverId, localMsgId } = data;
     const newMessage = new MessageModel({
       senderId,
       recieverId,
       message,
+      localMsgId,
     });
     await newMessage.save();
 

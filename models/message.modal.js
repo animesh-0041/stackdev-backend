@@ -10,6 +10,9 @@ const messageSchema = mongoose.Schema(
     message: {
       type: String,
     },
+    localMsgId: {
+      type: String,
+    },
   },
   {
     versionKey: false,
