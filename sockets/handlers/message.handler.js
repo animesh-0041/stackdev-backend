@@ -17,6 +17,7 @@ const handleSendMessage = (socket, io, userSockets) => {
       io.to(receiverSocketId).emit("receive-message", {
         senderId,
         message,
+        localMsgId,
       });
     }
   });

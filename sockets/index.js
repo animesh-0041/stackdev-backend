@@ -15,8 +15,6 @@ const initializeSocketServer = (server) => {
     },
   });
   const userSockets = new Map();
-  const onlineUsers = new Set();
-  const typingUsers = new Map();
   io.on("connection", (socket) => {
     handleNewUserJoined(socket, io, userSockets);
     handleSendMessage(socket, io, userSockets);
