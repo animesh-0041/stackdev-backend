@@ -7,8 +7,9 @@ const messageSchema = mongoose.Schema(
     recieverId: {
       type: mongoose.Schema.Types.ObjectId,
     },
-    message: {
-      type: String,
+    messageBody: {
+      type: Object,
+      default: {},
     },
     localMsgId: {
       type: String,
