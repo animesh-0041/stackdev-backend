@@ -3,11 +3,11 @@ const { MessageModel } = require("../../models/message.modal");
 const handleSendMessage = (socket, io, userSockets) => {
   socket.on("send-message", async (data) => {
     console.log("send-message", data);
-    const { message, senderId, recieverId, localMsgId } = data;
+    const { messageBody, senderId, recieverId, localMsgId } = data;
     const newMessage = new MessageModel({
       senderId,
       recieverId,
-      message,
+      messageBody,
       localMsgId,
     });
     await newMessage.save();
@@ -16,7 +16,7 @@ const handleSendMessage = (socket, io, userSockets) => {
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("receive-message", {
         senderId,
-        message,
+        messageBody,
         localMsgId,
       });
     }
