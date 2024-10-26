@@ -4,7 +4,6 @@ const { UserModel } = require("../../models/users.model");
 const { httpStatus } = require("../../config/lib/statusCode");
 const { mongoose } = require("mongoose");
 const { MessageModel } = require("../../models/message.modal");
-
 const chatRouter = express.Router();
 
 // get friends  list
@@ -94,6 +93,7 @@ chatRouter.get("/history", auth, async (req, res) => {
               recieverId: new mongoose.Types.ObjectId(userId),
             },
           ],
+          deletedForUserIds: { $ne: new mongoose.Types.ObjectId(userId) },
         },
       },
       {

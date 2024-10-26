@@ -11,6 +11,25 @@ const messageSchema = mongoose.Schema(
       type: Object,
       default: {},
     },
+    isVisibleSelfUser: {
+      type: Boolean,
+      default: true,
+    },
+    isEdited: {
+      type: Boolean,
+      default: false,
+    },
+    deletedForUserIds: {
+      type: [mongoose.Schema.Types.ObjectId],
+      default: [],
+    },
+    isDeletedForEveryone: {
+      type: Boolean,
+      default: false,
+    },
+    deletedTimestamp: {
+      type: Date,
+    },
     localMsgId: {
       type: String,
     },
